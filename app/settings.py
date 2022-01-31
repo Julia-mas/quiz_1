@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'account.apps.AccountsConfig',
+    'quiz.apps.QuizConfig',
+
 
 
 ]
@@ -127,7 +129,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+
+STATICFILES_DIRS = (
+    BASE_DIR / 'static',
+)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -145,7 +150,7 @@ USE_L1ON = False
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-EMAIL_PORT = 1025
+EMAIL_PORT = 1030
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 
