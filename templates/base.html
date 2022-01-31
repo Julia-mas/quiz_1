@@ -12,6 +12,8 @@
     <style>{% block custom_css %}{% endblock %}</style>
 </head>
 <body>
+  {% include 'includes/nav_bar.html' %}
+
   <div class="container mt-4 pt-4">
     <div class="border rounded text-center p-3 m-3 mb-5 bg-light shadow">
       <h1>{% block header %}Welcome to Quiz!!!{% endblock %}</h1>
