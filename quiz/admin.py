@@ -1,7 +1,8 @@
 from django.contrib import admin
 
+from .forms import ChoicesInlineFormset
+from .forms import QuestionInlineFormset
 from .models import Choice, Exam, Question, Result
-from .forms import ChoicesInlineFormset, QuestionInlineFormset
 
 
 class ChoicesInline(admin.TabularInline):
@@ -22,12 +23,12 @@ class QuestionInline(admin.TabularInline):
     show_change_link = True
     extra = 0
     ordering = ('order_num', )
+    formset = QuestionInlineFormset
 
 
 class ExamAdmin(admin.ModelAdmin):
     readonly_fields = ['uuid']
     inlines = (QuestionInline,)
-    formset = QuestionInlineFormset
 
 
 admin.site.register(Exam, ExamAdmin)
