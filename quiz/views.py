@@ -6,6 +6,7 @@ from django.views.generic import DetailView, CreateView, UpdateView
 from django.views.generic import ListView
 from django.views.generic.list import MultipleObjectMixin
 
+from account.models import CustomUser
 from .forms import ChoicesFormSet
 from .models import Exam, Result, Question
 
@@ -161,3 +162,14 @@ class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
                 }
             )
         )
+
+
+class ExamResultListView(LoginRequiredMixin, ListView):
+    model = Result
+    template_name = 'results/rating.html'
+    context_object_name = 'results'
+    paginate_by = 5
+
+    def get_queryset(self):
+        user = self.request.user
+        return Result.objects.filter(user=user)

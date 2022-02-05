@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import ExamDetailView
+from .views import ExamResultListView
 from .views import ExamListView
 from .views import ExamResultCreateView
 from .views import ExamResultQuestionView
@@ -20,4 +21,5 @@ urlpatterns = [
     path('<uuid:uuid>/results/<uuid:res_uuid>/questions/next/', ExamResultQuestionView.as_view(), name='question'),
     # path('<uuid:uuid>/result/<uuid:res_uuid>/question/<int:order_num>', ExamResultQuestionView.as_view(),
     #      name='question'),
+    path('results/', ExamResultListView.as_view(), name='result_list')
 ]

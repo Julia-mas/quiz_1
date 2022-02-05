@@ -28,11 +28,21 @@ class ChoicesInlineFormset(BaseInlineFormSet):
 
 class QuestionInlineFormset(BaseInlineFormSet):
     def clean(self):
-        if not (self.instance.QUESTION_MIN_LIMIT <= len(self.forms) <= self.instance.QUESTION_MAX_LIMIT):
+        if not (self.instance.QUESTION_MIN_LIMIT <= len(self.forms)
+                <= self.instance.QUESTION_MAX_LIMIT):
             raise ValidationError(
-                f'Кол-во вопросов должно быть в диапазоне от {self.instance.QUESTION_MIN_LIMIT} '
+                f'Кол-во вопросов должно быть в диапазоне от '
+                f'{self.instance.QUESTION_MIN_LIMIT} '
                 f'до {self.instance.QUESTION_MAX_LIMIT} включительно'
             )
+
+        clean_order_num = [form.cleaned_data['order_num'] for form in self.forms]
+        if min(clean_order_num) != 1:
+            raise ValidationError('Нумерация вопросов должна начинаться с 1')
+        if max(clean_order_num) != len(self.forms):
+            raise ValidationError('Максимальная нумерация не должна превышать кол-во вопросов')
+        if len(clean_order_num) != len(set(clean_order_num)):
+            raise ValidationError('Не правильная нумерация')
 
 
 class ChoiceForm(ModelForm):
