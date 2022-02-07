@@ -32,9 +32,14 @@
                         </tr>
                         <tr>
                             <td>Результат</td>
-                            <td>{{ result.num_correct_answers }}/{{ result.num_incorrect_answers }}</td>
-                        </tr>
+                            <td>
+                                 <div class="progress">
+                                 <div class="progress-bar bg-success" role="progressbar" style="width: {{ result.success_rate }}%"
+                                      aria-valuemin="0" aria-valuemax="100">
+                                 </div>
+                            </td>
                         <tr>
+                            <tr>
                             <td>Процент правильных ответов</td>
                             <td>{{ result.success_rate }} %</td>
                         </tr>
