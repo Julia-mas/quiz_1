@@ -1,11 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.generic import DetailView, CreateView, UpdateView
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from django.views.generic import ListView
 from django.views.generic.list import MultipleObjectMixin
 
+from account.models import CustomUser
 from .forms import ChoicesFormSet
 from .models import Exam, Result, Question
 
@@ -91,19 +94,21 @@ class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         uuid = kwargs.get('uuid')
         res_uuid = kwargs.get('res_uuid')
-        # order_num = kwargs.get('order_num')
-
         result = self.__get_res_by_uuid(**kwargs)
+        order_number = result.current_order_number + 1
         question = Question.objects.get(
             exam__uuid=uuid,
-            # order_num=order_num
-            order_num=result.current_order_number + 1
+            order_num=order_number
         )
         choices = ChoicesFormSet(data=request.POST)
         selected_choices = ['is_selected' in form.changed_data for form in choices.forms]
-        result = Result.objects.get(uuid=res_uuid)
-        # result.update_result(order_num, question, selected_choices)
-        result.update_result(result.current_order_number + 1, question, selected_choices)
+        if selected_choices.count(True) == 0:
+            messages.error(request, 'Выберите один или несколько правильных ответов')
+        elif selected_choices.count(True) == len(selected_choices):
+            messages.error(request, 'Все ответы не могут быть правильными')
+        else:
+            result = Result.objects.get(uuid=res_uuid)
+            result.update_result(result.current_order_number + 1, question, selected_choices)
 
         if result.state == Result.STATE.FINISHED:
             return HttpResponseRedirect(
@@ -140,6 +145,10 @@ class ExamResultDetailView(LoginRequiredMixin, DetailView):
 
 
 class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
+    permission_required = [
+        'account.view_statistics',
+    ]
+
     def get(self, request, *args, **kwargs):
         uuid = kwargs.get('uuid')
         res_uuid = kwargs.get('res_uuid')
@@ -161,3 +170,28 @@ class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
                 }
             )
         )
+
+
+class ExamResultListView(LoginRequiredMixin, ListView):
+    model = Result
+    template_name = 'results/rating.html'
+    context_object_name = 'results'
+    paginate_by = 5
+
+    def get_queryset(self):
+        user = self.request.user
+        return Result.objects.filter(user=user)
+
+
+class ExamResultDeleteView(LoginRequiredMixin, DeleteView):
+    def get(self, request, *args, **kwargs):
+        result_uuid = kwargs['res_uuid']
+        user = request.user
+
+        result = Result.objects.get(
+            user=user,
+            uuid=result_uuid
+        )
+        result.delete()
+
+        return HttpResponseRedirect(reverse('quizzes:list'))

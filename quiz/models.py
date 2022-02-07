@@ -19,15 +19,15 @@ class Exam(BaseModel):
     description = models.TextField(null=True, blank=True)
     level = models.PositiveSmallIntegerField(choices=LEVEL.choices, default=LEVEL.BASIC)
 
+    class Meta:
+        verbose_name = 'Exam'
+        verbose_name_plural = 'Exams'
+
     def __str__(self):
         return self.title
 
     def questions_count(self):
         return self.questions.count()
-
-    class Meta:
-        verbose_name = 'Exam'
-        verbose_name_plural = 'Exams'
 
 
 class Question(BaseModel):
@@ -36,12 +36,12 @@ class Question(BaseModel):
     text = models.CharField(max_length=2048)
     image = models.ImageField(null=True, blank=True, upload_to='questions/')
 
-    def __str__(self):
-        return self.text
-
     class Meta:
         verbose_name = 'Question'
         verbose_name_plural = 'Questions'
+
+    def __str__(self):
+        return self.text
 
 
 class Choice(models.Model):
@@ -96,5 +96,17 @@ class Result(BaseModel):
 
         self.save()
 
-    def points(self):
-        return max(0, self.num_correct_answers - self.num_incorrect_answers)
+    def success_rate(self):
+        return (self.num_correct_answers / (self.num_incorrect_answers + self.num_correct_answers)) * 100
+
+    def test_time(self):
+        return self.update_timestamp - self.create_timestamp
+
+    def test_points(self):
+        points = self.num_correct_answers - self.num_incorrect_answers
+        if points > 0:
+            points = points
+        else:
+            points = 0
+
+        return points
